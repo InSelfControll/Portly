@@ -36,7 +36,7 @@ func (d *Driver) ApplyNAT(ctx context.Context, rule models.NATRule) error {
 	}
 
 	richRule := fmt.Sprintf(
-		`rule family="ipv4" forward-port port="%d" protocol="%s" to-port="%d" to-addr="%s" accept`,
+		`rule family="ipv4" forward-port port="%d" protocol="%s" to-port="%d" to-addr="%s"`,
 		rule.ExternalPort,
 		strings.ToLower(string(rule.Proto)),
 		rule.InternalPort,
@@ -76,7 +76,7 @@ func (d *Driver) RemoveNAT(ctx context.Context, ruleID string) error {
 	}
 
 	richRule := fmt.Sprintf(
-		`rule family="ipv4" forward-port port="%d" protocol="%s" to-port="%d" to-addr="%s" accept`,
+		`rule family="ipv4" forward-port port="%d" protocol="%s" to-port="%d" to-addr="%s"`,
 		targetRule.ExternalPort,
 		strings.ToLower(string(targetRule.Proto)),
 		targetRule.InternalPort,

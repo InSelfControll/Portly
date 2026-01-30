@@ -65,7 +65,8 @@ func (f *AddRuleForm) GetRule() (models.NATRule, error) {
 		Proto:        proto,
 		Description:  f.fields[5].Value(),
 	}
-	return rule, rule.Validate()
+	// Return rule without calling .Validate() here
+	return rule, nil
 }
 
 // Reset clears the form

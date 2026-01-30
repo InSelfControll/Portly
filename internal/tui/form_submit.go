@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/google/uuid"
 	"github.com/orchestrator/unified-firewall/internal/platform"
 	"github.com/orchestrator/unified-firewall/pkg/models"
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 // errMsg represents an error message
@@ -36,14 +36,18 @@ func (m *Model) submitAddRule() (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	rule, err := m.addRuleForm.GetRule()
-	if err != nil {
+	// 1. Get the populated rule data
+	rule, _ := m.addRuleForm.GetRule()
+
+	// 2. Generate and assign the ID FIRST
+	rule.ID = uuid.New().String()[:8]
+
+	// 3. Perform validation NOW that the ID is present
+	if err := rule.Validate(); err != nil {
 		m.lastError = err
 		m.screen = ScreenError
 		return m, nil
 	}
-
-	rule.ID = uuid.New().String()[:8]
 
 	m.loadingMsg = "Applying NAT rule..."
 	m.screen = ScreenLoading

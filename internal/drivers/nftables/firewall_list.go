@@ -76,10 +76,6 @@ func (d *Driver) findFilterRuleHandle(ctx context.Context, rule models.FirewallR
 	return "", nil
 }
 
-func extractHandle(line string) string {
-	panic("unimplemented")
-}
-
 // ListFirewallRules lists all firewall rules
 func (d *Driver) ListFirewallRules(ctx context.Context) ([]models.FirewallRule, error) {
 	cmd := exec.CommandContext(ctx, "nft", "-a", "list", "chain", "inet", filterTableName, filterChainName)
