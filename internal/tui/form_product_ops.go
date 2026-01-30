@@ -32,7 +32,12 @@ func (f *AddRuleForm) CheckProductChange() bool {
 // NextField moves to the next field
 func (f *AddRuleForm) NextField() tea.Cmd {
 	f.fields[f.focus].Blur()
-	f.focus = (f.focus + 1) % len(f.fields)
+	next := f.nextFocusableIndex(f.focus)
+	if next == -1 {
+		// Wrap around to first visible field
+		next = f.nextFocusableIndex(-1)
+	}
+	f.focus = next
 	f.optionFocus = -1
 	return f.fields[f.focus].Focus()
 }

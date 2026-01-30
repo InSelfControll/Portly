@@ -15,9 +15,16 @@ import (
 type Screen int
 
 const (
-	ScreenMenu Screen = iota
-	ScreenAddRule
+	ScreenMenu          Screen = iota
+	ScreenAddRuleSelect        // Selection screen for rule types
+	ScreenAddNATRule           // Renamed from ScreenAddRule
+	ScreenOpenPort             // Just open a port
+	ScreenOpenIPPort           // Specific IP for specific port
+	ScreenOpenIP               // Allow all traffic from specific IP
 	ScreenListRules
+	ScreenFirewall
+	ScreenSecurity
+	ScreenSecurityRules
 	ScreenStatus
 	ScreenCheck
 	ScreenLoading
@@ -27,23 +34,38 @@ const (
 
 // Model is the main TUI model
 type Model struct {
-	ctx       context.Context
-	provider  drivers.Provider
-	stateMgr  *state.Manager
-	osInfo    *platform.OSInfo
-	
-	screen        Screen
-	width         int
-	height        int
-	lastError     error
-	successMsg    string
-	
+	ctx      context.Context
+	provider drivers.Provider
+	stateMgr *state.Manager
+	osInfo   *platform.OSInfo
+
+	screen     Screen
+	width      int
+	height     int
+	lastError  error
+	successMsg string
+
 	menuItems []list.Item
 	menuList  list.Model
-	addRuleForm   *AddRuleForm
-	
-	rules         []models.AppliedRule
-	loadingMsg    string
+
+	// Sub-menu for Add Rule
+	subItems        []list.Item
+	ruleSubMenuList list.Model
+
+	addRuleForm *AddRuleForm
+
+	// Rules storage
+	natRules         []models.NATRule
+	firewallRules    []models.FirewallRule
+	ruleViewMode     string // "nat" or "firewall"
+	rulesScrollOffset int
+	loadingMsg       string
+
+	// Security rules storage
+	seLinuxBooleans      []SELinuxBoolean
+	appArmorProfiles     []AppArmorProfile
+	securitySelectionIdx int
+	securityScrollOffset int
 }
 
 type menuItem struct {

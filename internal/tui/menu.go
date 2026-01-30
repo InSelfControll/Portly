@@ -18,11 +18,11 @@ func (m *Model) updateMenu(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, tea.Quit
 				}
 				m.screen = item.screen
-				
+
 				// Initialize data for the selected screen
 				switch item.screen {
 				case ScreenListRules:
-					return m, m.loadRules()
+					return m, m.loadAllRules()
 				case ScreenStatus:
 					return m, nil
 				case ScreenCheck:
@@ -37,15 +37,48 @@ func (m *Model) updateMenu(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+// updateAddRuleSelect handles sub-menu updates
+func (m *Model) updateAddRuleSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		if key.Matches(msg, keys.Enter) {
+			item, ok := m.ruleSubMenuList.SelectedItem().(menuItem)
+			if ok {
+				m.screen = item.screen
+
+				// Initialize and configure the form based on selection
+				switch item.screen {
+				case ScreenAddNATRule:
+					m.addRuleForm.SetType(FormTypeNAT)
+					return m, m.addRuleForm.Init()
+				case ScreenOpenPort:
+					m.addRuleForm.SetType(FormTypeOpenPort)
+					return m, m.addRuleForm.Init()
+				case ScreenOpenIPPort:
+					m.addRuleForm.SetType(FormTypeOpenIPPort)
+					return m, m.addRuleForm.Init()
+				case ScreenOpenIP:
+					m.addRuleForm.SetType(FormTypeOpenIP)
+					return m, m.addRuleForm.Init()
+				}
+			}
+		}
+	}
+
+	var cmd tea.Cmd
+	m.ruleSubMenuList, cmd = m.ruleSubMenuList.Update(msg)
+	return m, cmd
+}
+
 // viewMenu renders the menu
 func (m *Model) viewMenu() string {
-	title := styles.Title.Render("🔥 Unified Firewall Orchestrator")
+	title := styles.Title.Render("🔥 Portly")
 	subtitle := styles.Subtitle.Render("Manage NAT rules and security policies")
-	
+
 	menu := m.menuList.View()
-	
+
 	help := styles.Help.Render("↑/↓: navigate • enter: select • q: quit")
-	
+
 	return lipgloss.JoinVertical(
 		lipgloss.Center,
 		title,

@@ -17,7 +17,9 @@ func (m *Model) View() string {
 	switch m.screen {
 	case ScreenMenu:
 		content = m.viewMenu()
-	case ScreenAddRule:
+	case ScreenAddRuleSelect:
+		content = m.viewAddRuleSelect()
+	case ScreenAddNATRule, ScreenOpenPort, ScreenOpenIPPort, ScreenOpenIP:
 		content = m.viewAddRule()
 	case ScreenListRules:
 		content = m.viewListRules()
@@ -25,6 +27,8 @@ func (m *Model) View() string {
 		content = m.viewFirewall()
 	case ScreenSecurity:
 		content = m.viewSecurity()
+	case ScreenSecurityRules:
+		content = m.viewSecurityRules()
 	case ScreenStatus:
 		content = m.viewStatus()
 	case ScreenCheck:
@@ -59,4 +63,23 @@ func (m *Model) renderStatusBar() string {
 	)
 
 	return styles.StatusBar.Width(m.width).Render(status)
+}
+
+func (m *Model) viewAddRuleSelect() string {
+	title := styles.Title.Render("Add New Rule")
+	subtitle := styles.Subtitle.Render("Select the type of rule to create")
+
+	menu := m.ruleSubMenuList.View()
+
+	help := styles.Help.Render("↑/↓: navigate • enter: select • esc: back")
+
+	return lipgloss.JoinVertical(
+		lipgloss.Center,
+		title,
+		subtitle,
+		"",
+		styles.Panel.Render(menu),
+		"",
+		help,
+	)
 }

@@ -56,47 +56,97 @@ func (d *Driver) removeFirewallRule(ctx context.Context, rule models.FirewallRul
 
 // ListFirewallRules lists all firewall rules
 func (d *Driver) ListFirewallRules(ctx context.Context) ([]models.FirewallRule, error) {
-	cmd := exec.CommandContext(ctx, "firewall-cmd", "--permanent", "--list-ports")
-	output, err := cmd.Output()
-	if err != nil {
-		return nil, fmt.Errorf("failed to list ports: %w", err)
-	}
-
 	var rules []models.FirewallRule
-	lines := strings.Split(string(output), "\n")
+	seen := make(map[string]bool)
 
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
+	// Try to list runtime ports first
+	cmd := exec.CommandContext(ctx, "firewall-cmd", "--list-ports")
+	output, err := cmd.Output()
+	if err == nil {
+		lines := strings.Split(string(output), "\n")
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if line == "" {
+				continue
+			}
+
+			parts := strings.Split(line, "/")
+			if len(parts) != 2 {
+				continue
+			}
+
+			port, err := strconv.Atoi(parts[0])
+			if err != nil {
+				continue
+			}
+
+			proto := models.TCP
+			if parts[1] == "udp" {
+				proto = models.UDP
+			}
+
+			key := fmt.Sprintf("%d-%s", port, proto)
+			if !seen[key] {
+				seen[key] = true
+				rules = append(rules, models.FirewallRule{
+					ID:       fmt.Sprintf("fw-port-%d-%s", port, proto),
+					Type:     models.RuleTypePort,
+					Port:     port,
+					Protocol: proto,
+				})
+			}
 		}
-
-		parts := strings.Split(line, "/")
-		if len(parts) != 2 {
-			continue
-		}
-
-		port, err := strconv.Atoi(parts[0])
-		if err != nil {
-			continue
-		}
-
-		proto := models.TCP
-		if parts[1] == "udp" {
-			proto = models.UDP
-		}
-
-		rules = append(rules, models.FirewallRule{
-			ID:       fmt.Sprintf("fw-port-%d-%s", port, proto),
-			Type:     models.RuleTypePort,
-			Port:     port,
-			Protocol: proto,
-		})
 	}
 
+	// Also check permanent config
+	cmd = exec.CommandContext(ctx, "firewall-cmd", "--permanent", "--list-ports")
+	output, err = cmd.Output()
+	if err == nil {
+		lines := strings.Split(string(output), "\n")
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if line == "" {
+				continue
+			}
+
+			parts := strings.Split(line, "/")
+			if len(parts) != 2 {
+				continue
+			}
+
+			port, err := strconv.Atoi(parts[0])
+			if err != nil {
+				continue
+			}
+
+			proto := models.TCP
+			if parts[1] == "udp" {
+				proto = models.UDP
+			}
+
+			key := fmt.Sprintf("%d-%s", port, proto)
+			if !seen[key] {
+				seen[key] = true
+				rules = append(rules, models.FirewallRule{
+					ID:       fmt.Sprintf("fw-port-%d-%s", port, proto),
+					Type:     models.RuleTypePort,
+					Port:     port,
+					Protocol: proto,
+				})
+			}
+		}
+	}
+
+	// Parse rich rules
 	richRules, err := d.parseRichRules(ctx)
 	if err == nil {
-		rules = append(rules, richRules...)
+		for _, r := range richRules {
+			key := r.ID
+			if !seen[key] {
+				seen[key] = true
+				rules = append(rules, r)
+			}
+		}
 	}
 
 	return rules, nil

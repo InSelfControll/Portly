@@ -54,3 +54,26 @@ func (d *Driver) OpenPortForIP(ctx context.Context, rule models.FirewallRule) er
 
 	return d.reload(ctx)
 }
+
+// TrustIP opens all ports for a specific source IP
+func (d *Driver) TrustIP(ctx context.Context, rule models.FirewallRule) error {
+	if err := rule.Validate(); err != nil {
+		return fmt.Errorf("invalid firewall rule: %w", err)
+	}
+
+	richRule := fmt.Sprintf(
+		`rule family="ipv4" source address="%s" accept`,
+		rule.SourceIP,
+	)
+
+	cmd := exec.CommandContext(ctx, "firewall-cmd", "--permanent", "--add-rich-rule", richRule)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		if strings.Contains(string(output), "already") {
+			return nil
+		}
+		return fmt.Errorf("failed to trust IP: %w (output: %s)", err, string(output))
+	}
+
+	return d.reload(ctx)
+}

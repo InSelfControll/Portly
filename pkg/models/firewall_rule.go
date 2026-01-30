@@ -12,6 +12,7 @@ const (
 	RuleTypeNAT       FirewallRuleType = "nat"
 	RuleTypePort      FirewallRuleType = "port"
 	RuleTypePortLimit FirewallRuleType = "port_limit"
+	RuleTypeTrustIP   FirewallRuleType = "trust_ip"
 )
 
 // FirewallRule represents a firewall rule (port open, NAT, or IP-limited)
@@ -31,11 +32,13 @@ func (r *FirewallRule) Validate() error {
 	if r.ID == "" {
 		return fmt.Errorf("rule ID is required")
 	}
-	if r.Port < 1 || r.Port > 65535 {
-		return fmt.Errorf("port must be between 1 and 65535")
-	}
-	if r.Protocol != TCP && r.Protocol != UDP {
-		return fmt.Errorf("protocol must be 'tcp' or 'udp'")
+	if r.Type != RuleTypeTrustIP {
+		if r.Port < 1 || r.Port > 65535 {
+			return fmt.Errorf("port must be between 1 and 65535")
+		}
+		if r.Protocol != TCP && r.Protocol != UDP {
+			return fmt.Errorf("protocol must be 'tcp' or 'udp'")
+		}
 	}
 	if r.SourceIP != "" && net.ParseIP(r.SourceIP) == nil {
 		return fmt.Errorf("source IP '%s' is not valid", r.SourceIP)

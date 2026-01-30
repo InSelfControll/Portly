@@ -31,6 +31,7 @@ type EnhancedFormField struct {
 func NewEnhancedFormField(label string, required bool, fieldType FieldType, placeholder string) EnhancedFormField {
 	input := textinput.New()
 	input.Placeholder = placeholder
+	input.Width = 40
 	return EnhancedFormField{
 		label:     label,
 		input:     input,

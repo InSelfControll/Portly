@@ -2,6 +2,7 @@ package nftables
 
 import (
 	"context"
+	"fmt"
 	"os/exec"
 	"strings"
 
@@ -10,9 +11,9 @@ import (
 )
 
 const (
-	driverName  = "nftables"
-	tableName   = "orchestrator_nat"
-	chainName   = "prerouting"
+	driverName = "nftables"
+	tableName  = "orchestrator_nat"
+	chainName  = "prerouting"
 )
 
 // Driver implements the Provider interface for nftables (Ubuntu/Debian)
@@ -89,4 +90,9 @@ func (d *Driver) EnsureSecurityPolicy(ctx context.Context, product string, polic
 // RemoveSecurityPolicy removes security policies
 func (d *Driver) RemoveSecurityPolicy(ctx context.Context, product string) error {
 	return nil
+}
+
+// TrustIP opens all ports for a specific source IP
+func (d *Driver) TrustIP(ctx context.Context, rule models.FirewallRule) error {
+	return fmt.Errorf("TrustIP not implemented for nftables")
 }

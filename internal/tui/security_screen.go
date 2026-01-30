@@ -10,7 +10,6 @@ import (
 )
 
 // ScreenSecurity is the security management screen
-const ScreenSecurity Screen = 11
 
 // updateSecurity handles security screen updates
 func (m *Model) updateSecurity(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -21,13 +20,23 @@ func (m *Model) updateSecurity(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		if key.Matches(msg, key.NewBinding(key.WithKeys("1"))) && m.osInfo.IsRHEL() {
+			m.loadingMsg = "Setting SELinux to enforcing..."
+			m.screen = ScreenLoading
 			return m, m.toggleSELinux()
 		}
 		if key.Matches(msg, key.NewBinding(key.WithKeys("2"))) && m.osInfo.IsRHEL() {
+			m.loadingMsg = "Setting SELinux to permissive..."
+			m.screen = ScreenLoading
 			return m, m.setSELinuxPermissive()
 		}
 		if key.Matches(msg, key.NewBinding(key.WithKeys("a"))) && m.osInfo.IsDebian() {
+			m.loadingMsg = "Toggling AppArmor..."
+			m.screen = ScreenLoading
 			return m, m.toggleAppArmor()
+		}
+		if key.Matches(msg, key.NewBinding(key.WithKeys("v"))) && (m.osInfo.IsRHEL() || m.osInfo.IsDebian()) {
+			m.screen = ScreenSecurityRules
+			return m, m.loadSecurityRulesData()
 		}
 	}
 	return m, nil
@@ -48,7 +57,13 @@ func (m *Model) viewSecurity() string {
 		content = styles.Warning.Render("Security management not available on this platform")
 	}
 
-	help := styles.Help.Render("esc: back")
+	var helpText string
+	if m.osInfo.IsRHEL() || m.osInfo.IsDebian() {
+		helpText = "esc: back • v: view rules"
+	} else {
+		helpText = "esc: back"
+	}
+	help := styles.Help.Render(helpText)
 
 	return lipgloss.JoinVertical(
 		lipgloss.Left,

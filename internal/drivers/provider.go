@@ -27,6 +27,7 @@ type Provider interface {
 	// Firewall rules (port opening)
 	OpenPort(ctx context.Context, rule models.FirewallRule) error
 	OpenPortForIP(ctx context.Context, rule models.FirewallRule) error
+	TrustIP(ctx context.Context, rule models.FirewallRule) error
 	ClosePort(ctx context.Context, ruleID string) error
 	ListFirewallRules(ctx context.Context) ([]models.FirewallRule, error)
 

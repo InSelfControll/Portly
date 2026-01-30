@@ -38,8 +38,6 @@ func (m *Model) viewError() string {
 	errMsg := styles.Error.Render(m.lastError.Error())
 	help := styles.Help.Render("any key: back")
 
-	m.screen = ScreenAddRule
-
 	return lipgloss.JoinVertical(
 		lipgloss.Center,
 		title,
@@ -54,8 +52,6 @@ func (m *Model) viewSuccess() string {
 	title := styles.Title.Render("Success")
 	success := styles.Success.Render(m.successMsg)
 	help := styles.Help.Render("any key: menu")
-
-	m.screen = ScreenMenu
 
 	return lipgloss.JoinVertical(
 		lipgloss.Center,

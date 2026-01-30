@@ -10,7 +10,6 @@ import (
 )
 
 // ScreenFirewall is the firewall management screen
-const ScreenFirewall Screen = 10
 
 // updateFirewall handles firewall screen updates
 func (m *Model) updateFirewall(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -21,12 +20,18 @@ func (m *Model) updateFirewall(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		if key.Matches(msg, key.NewBinding(key.WithKeys("1"))) {
+			m.loadingMsg = "Starting firewall..."
+			m.screen = ScreenLoading
 			return m, m.toggleFirewall(true)
 		}
 		if key.Matches(msg, key.NewBinding(key.WithKeys("2"))) {
+			m.loadingMsg = "Stopping firewall..."
+			m.screen = ScreenLoading
 			return m, m.toggleFirewall(false)
 		}
 		if key.Matches(msg, key.NewBinding(key.WithKeys("i"))) {
+			m.loadingMsg = "Installing firewall..."
+			m.screen = ScreenLoading
 			return m, m.installFirewall()
 		}
 	}

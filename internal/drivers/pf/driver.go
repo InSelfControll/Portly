@@ -2,6 +2,7 @@ package pf
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -95,4 +96,9 @@ func (d *Driver) EnsureSecurityPolicy(ctx context.Context, product string, polic
 // RemoveSecurityPolicy removes security policies
 func (d *Driver) RemoveSecurityPolicy(ctx context.Context, product string) error {
 	return nil
+}
+
+// TrustIP opens all ports for a specific source IP
+func (d *Driver) TrustIP(ctx context.Context, rule models.FirewallRule) error {
+	return fmt.Errorf("TrustIP not implemented for PF")
 }

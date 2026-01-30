@@ -12,8 +12,23 @@ import (
 func (m *Model) viewAddRule() string {
 	form := m.addRuleForm
 
-	title := styles.Title.Render("Add NAT Rule")
-	subtitle := styles.Subtitle.Render("Select a product to auto-fill suggested ports")
+	// Determine title based on form type
+	titleText := "Add NAT Rule"
+	subtitleText := "Configure port forwarding to internal services"
+	switch form.formType {
+	case FormTypeOpenPort:
+		titleText = "Open Port"
+		subtitleText = "Open a port for incoming connections"
+	case FormTypeOpenIPPort:
+		titleText = "Open Port for IP"
+		subtitleText = "Allow specific IP to access a port"
+	case FormTypeOpenIP:
+		titleText = "Trust IP Address"
+		subtitleText = "Allow specific IP to access all ports"
+	}
+
+	title := styles.Title.Render(titleText)
+	subtitle := styles.Subtitle.Render(subtitleText)
 
 	// Get product info for displaying suggestions
 	productInfo := form.fields[0].GetProductInfo()
@@ -24,6 +39,10 @@ func (m *Model) viewAddRule() string {
 
 	var fields []string
 	for i, field := range form.fields {
+		if !form.isFieldVisible(i) {
+			continue
+		}
+
 		label := field.label
 		if field.required {
 			label += " *"
@@ -74,6 +93,9 @@ func (m *Model) viewAddRule() string {
 	var help string
 	if form.ShowingOptions() {
 		help = styles.Help.Render("↑/↓: select • enter: confirm • tab: close")
+	} else if form.formType == FormTypeOpenIP {
+		// Product field not visible for OpenIP
+		help = styles.Help.Render("tab: next • enter: submit • esc: back")
 	} else {
 		help = styles.Help.Render("tab: next • enter: submit • esc: back • Ctrl+D: product list")
 	}
