@@ -12,6 +12,7 @@ import (
 
 // ClosePort removes a firewall rule
 func (d *Driver) ClosePort(ctx context.Context, ruleID string) error {
+	portlyAnchorFile := ""
 	content, err := os.ReadFile(portlyAnchorFile)
 	if err != nil {
 		return err
@@ -45,6 +46,7 @@ func (d *Driver) ClosePort(ctx context.Context, ruleID string) error {
 
 // ListFirewallRules lists all firewall rules
 func (d *Driver) ListFirewallRules(ctx context.Context) ([]models.FirewallRule, error) {
+	portlyAnchorFile := ""
 	content, err := os.ReadFile(portlyAnchorFile)
 	if err != nil {
 		if os.IsNotExist(err) {

@@ -12,6 +12,7 @@ import (
 
 // loadPortlyAnchor loads the portly PF anchor
 func (d *Driver) loadPortlyAnchor(ctx context.Context) error {
+	portlyAnchorFile := ""
 	cmd := exec.CommandContext(ctx, pfctlPath, "-a", "com.portly", "-f", portlyAnchorFile)
 	if err := cmd.Run(); err != nil {
 		return err
@@ -47,6 +48,7 @@ func (d *Driver) OpenPortForIP(ctx context.Context, rule models.FirewallRule) er
 
 // appendToAnchor appends a rule to the PF anchor file
 func (d *Driver) appendToAnchor(ctx context.Context, ruleStr string) error {
+	portlyAnchorFile := ""
 	content, err := os.ReadFile(portlyAnchorFile)
 	if err != nil {
 		return err
